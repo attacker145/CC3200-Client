@@ -1,3 +1,3 @@
 # CC3200-Client
-Remote control and monitoring of the CC3200 board with AK9753 (Qwiic) (https://www.sparkfun.com/products/14349) sensor.
+This code allows remote control and monitoring of the CC3200 board with AK9753 (Qwiic) (https://www.sparkfun.com/products/14349) sensor. The board transmits data from AK9753 sensor, the onboard temperature sensor, and status of the Red LED to the http://cnktechlabs.com/webapp_pub/grid.php webpage.
 AK9753 is connected to I2C lines on the board - PIN_01 is the SCL and PIN_02 is the SDA. Compile and download CC3200_client.bin file into CC3200 development board. Connect Dev board to a PC. View messages on a Serial terminal on your PC. Monitor CC3200 and control Red LED from http://cnktechlabs.com/webapp_pub/grid.php webpage.
