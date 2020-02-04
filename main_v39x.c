@@ -1,9 +1,3 @@
-/*
- *
- * Copyright (C) 2019
- * Austhor: Roman Chak
- *
- */
 
 #include <string.h>
 #include <stdlib.h>
@@ -1522,6 +1516,18 @@ static int readPageResponse(HTTPCli_Handle httpClient)//Read data.txt page
                 dataBuffer = (char *)g_buff;
             }
             bytesRead = HTTPCli_readResponseBody(httpClient, (char *)dataBuffer, len, &moreFlags);
+            if(bytesRead < 0)
+            {
+                UART_PRINT("\n\r Failed to received response body\n\r");
+                lRetVal = bytesRead;
+                goto end;
+            }
+            else if( bytesRead < len || moreFlags)
+            {
+                UART_PRINT("\n\r Mismatch in content length and received data length\n\r");
+                goto end;
+            }
+            dataBuffer[bytesRead] = '\0';
             UART_PRINT(", Text from /webapp/CC3200command.php ");
             char *output = NULL;
 
@@ -1540,20 +1546,6 @@ static int readPageResponse(HTTPCli_Handle httpClient)//Read data.txt page
                 UART_PRINT("\n No Keyword ");
             }
             //--------------------------------------------------------------------------------------------------
-
-
-            if(bytesRead < 0)
-            {
-                UART_PRINT("\n\r Failed to received response body\n\r");
-                lRetVal = bytesRead;
-                goto end;
-            }
-            else if( bytesRead < len || moreFlags)
-            {
-                UART_PRINT("\n\r Mismatch in content length and received data length\n\r");
-                goto end;
-            }
-            dataBuffer[bytesRead] = '\0';
 
             if(json)
             {
