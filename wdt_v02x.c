@@ -62,7 +62,8 @@
 #include "gpio_if.h"
 #include "wdt_if.h"
 #include "pinmux.h"
-
+#include "common.h"
+#include "uart_if.h"
 
 extern void EnterHIBernate();
 
@@ -76,6 +77,7 @@ extern void EnterHIBernate();
 //                 GLOBAL VARIABLES -- Start
 //*****************************************************************************
 extern volatile tBoolean g_bFeedWatchdog;
+extern volatile unsigned char wdtcntr;
 //extern volatile unsigned long g_ulWatchdogCycles;
 #if defined(ccs)
 extern void (* const g_pfnVectors[])(void);
@@ -100,8 +102,12 @@ void WatchdogIntHandler(void)
     // without clearing the interrupt.  This will cause the system to reset
     // next time the watchdog interrupt fires.
     //
-    if(!g_bFeedWatchdog)
+    wdtcntr++;
+    //if(!g_bFeedWatchdog)
+    if(wdtcntr == 50)
     {
+        UART_PRINT(" ---> WDT triggered %d", wdtcntr);
+        wdtcntr = 0;
         EnterHIBernate(); //05/24/2019
         return;
     }

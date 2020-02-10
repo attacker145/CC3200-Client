@@ -154,7 +154,7 @@ void EnterHIBernate()
     //
     MAP_PRCMHibernateWakeupSourceEnable(PRCM_HIB_SLOW_CLK_CTR);
 
-    DBG_PRINT(", HIB: Entering HIBernate...");
+    DBG_PRINT("HIB: Entering HIBernate...");
     MAP_UtilsDelay(80000);
 
     //

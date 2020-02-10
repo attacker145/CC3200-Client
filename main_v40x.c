@@ -1198,7 +1198,7 @@ static int HTTPPostMethod_data(HTTPCli_Handle httpClient)
         return lRetVal;
     }
 
-    sprintf((char *)tmpBuf, "%d", (sizeof(buf)-14));  // Print Size of POST data body 99
+    sprintf((char *)tmpBuf, "%d", (sizeof(buf)-26));  // Print Size of POST data body 99
 
     /*
      * Here we are setting lastFlag = 1 as it is last header field.
@@ -1216,7 +1216,7 @@ static int HTTPPostMethod_data(HTTPCli_Handle httpClient)
 
     /* Send POST data/body */
     //lRetVal = HTTPCli_sendRequestBody(httpClient, POST_DATA, (sizeof(POST_DATA)-1));
-    lRetVal = HTTPCli_sendRequestBody(httpClient, buf, (sizeof(buf)-14)); // POST data body
+    lRetVal = HTTPCli_sendRequestBody(httpClient, buf, (sizeof(buf)-26)); // POST data body
     if(lRetVal < 0)
     {
         UART_PRINT("Failed to send HTTP POST request body");
@@ -1529,12 +1529,12 @@ static int readPageResponse(HTTPCli_Handle httpClient)//Read data.txt page
             if (output){
                 GPIO_IF_GetPortNPin(SH_GPIO_9,&uiGPIOPort,&pucGPIOPin); // Turn On Red LED
                 GPIO_IF_Set(SH_GPIO_9,uiGPIOPort,pucGPIOPin,alarm_off);
-                UART_PRINT("\n The Keyword is received ");
+                UART_PRINT("\n LED ON ");
             }
             else{
                 GPIO_IF_GetPortNPin(SH_GPIO_9,&uiGPIOPort,&pucGPIOPin); // Turn Off Red LED
                 GPIO_IF_Set(SH_GPIO_9,uiGPIOPort,pucGPIOPin,alarm_on);
-                UART_PRINT("\n No Keyword ");
+                UART_PRINT("\n LED OFF ");
             }
             //--------------------------------------------------------------------------------------------------
 
@@ -1981,13 +1981,13 @@ int main()
     Door = GPIO_IF_Get(SH_GPIO_6,uiGPIOPort,pucGPIOPin);// Read the door
 #endif
 
-    strcpy ( &buf[76], " &TN=TBL1"); //buf[84]
+    strcpy ( &buf[66], " &TN=TBL1"); //buf[74]
 
-    strcpy ( &buf[62], " &RoomT="); //buf[7]
-    strcpy ( &buf[8], " &IR1="); //buf[13]
-    strcpy ( &buf[19], " &IR2=");//buf[24]
-    strcpy ( &buf[30], " &IR3=");//buf[35]
-    strcpy ( &buf[41], " & IR4=");//buf[47]
+    strcpy ( &buf[53], " &RoomT="); //buf[60]
+    strcpy ( &buf[0], " &IR1="); //buf[5]
+    strcpy ( &buf[11], " &IR2=");//buf[16]
+    strcpy ( &buf[22], " &IR3=");//buf[27]
+    strcpy ( &buf[33], " &IR4=");//buf[38]
 
     //----------------------------------------------------------------------------------------------------------
     while(1){
@@ -1995,8 +1995,9 @@ int main()
         TMP006DrvGetTemp_(&sensorTemp);
         UART_PRINT("%.2f ", sensorTemp);  //
         sprintf(rtbuf, "%.2f", sensorTemp);//XX.XX (23.04) - 5 bytes
-        //strcpy ( &buf[62], " &RoomT="); //buf[7]                                                       //*
-        strcpy ( &buf[70], rtbuf);//buf[74]
+                                                               //*
+        strcpy ( &buf[61], rtbuf);//buf[65]
+
 #ifdef AK975
         //Read GPIO12: AK9753A INT
         GPIO_IF_GetPortNPin(SH_GPIO_12,&uiGPIOPort,&pucGPIOPin);    // Computes port and pin number from the GPIO number
@@ -2023,7 +2024,7 @@ int main()
        UART_PRINT(", IR1=");                                                                    //*
        UART_PRINT(&Rx_buf[4]);                                                                  //*                                                                                                                                                                                          //*
                                                          //*
-       strcpy ( &buf[14], &Rx_buf[5]);//5 bytes buf[18]                                         //*
+       strcpy ( &buf[6], &Rx_buf[5]);//5 bytes buf[10]                                         //*
                                                                                        //*
        IR1 = IR2H_;                                                                             //*
        IR1 = IR1 << 8;                                                                          //*
@@ -2032,7 +2033,7 @@ int main()
        UART_PRINT(", IR2=");                                                                    //*
        UART_PRINT(&Rx_buf[4]); //                                                               //*
                                                       //*
-       strcpy ( &buf[25], &Rx_buf[5]); //buf[29]                                                //*
+       strcpy ( &buf[17], &Rx_buf[5]); //buf[21]                                                //*
                                                                                        //*
        IR1 = IR3H_;                                                                             //*
        IR1 = IR1 << 8;                                                                          //*
@@ -2041,7 +2042,7 @@ int main()
        UART_PRINT(", IR3=");                                                                    //*
        UART_PRINT(&Rx_buf[4]);                                                                  //*
                                                    //*
-       strcpy ( &buf[36], &Rx_buf[5]);//buf[40]                                                          //*
+       strcpy ( &buf[28], &Rx_buf[5]);//buf[32]                                                          //*
                                                                                         //*
        IR1 = IR4H_;                                                                             //*
        IR1 = IR1 << 8;                                                                          //*
@@ -2050,7 +2051,7 @@ int main()
        UART_PRINT(", IR4=");                                                                    //*
        UART_PRINT(&Rx_buf[4]);                                                                  //*
                                                            //*
-       strcpy ( &buf[48], &Rx_buf[5]);//buf[52]                                                           //*
+       strcpy ( &buf[39], &Rx_buf[5]);//buf[43]                                                           //*
                                                                                                 //*
        //gcvt(roomtemp, 6, buf); sensorTemp
        //sprintf(rtbuf, "%.2f", roomtemp);
@@ -2082,13 +2083,14 @@ int main()
         ucPinValue = GPIO_IF_Get(SH_GPIO_9,uiGPIOPort,pucGPIOPin);
         if (ucPinValue == 1){
             //UART_PRINT("\n Red LED is ON \n");
-            strcpy ( &buf[53], " &BLE=ON ");//40
+            strcpy ( &buf[44], " &BLE=ON ");//buf[52]
         }else{
             //UART_PRINT("\n Red LED is OFF \n");
-            strcpy ( &buf[53], " &BLE=OFF");//buf[61]
+            strcpy ( &buf[44], " &BLE=OFF");//buf[52]
         }
         t_cntr++;
         t_cntr1++;
+
         MAP_UtilsDelay(1280000);
 #endif
 
