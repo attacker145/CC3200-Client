@@ -334,7 +334,7 @@ unsigned char  g_ucConnectionSSID[SSID_LEN_MAX+1]; //Connection SSID
 unsigned char  g_ucConnectionBSSID[BSSID_LEN_MAX]; //Connection BSSID
 unsigned char g_buff[MAX_BUFF_SIZE+1];
 long bytesReceived = 0; // variable to store the file size
-char buf[99];
+char buf[75];
 unsigned char ucPinValue;//02/17/2017
 unsigned char Lght = 0;
 unsigned char Door = 0;
@@ -1143,7 +1143,7 @@ static int readResponse(HTTPCli_Handle httpClient)
     }
     else
     {
-        UART_PRINT("Failed to receive data from server.\r\n");
+        UART_PRINT("  POST: Failed the response header from the HTTP server. ");
         goto end;
     }
 
@@ -1198,7 +1198,7 @@ static int HTTPPostMethod_data(HTTPCli_Handle httpClient)
         return lRetVal;
     }
 
-    sprintf((char *)tmpBuf, "%d", (sizeof(buf)-26));  // Print Size of POST data body 99
+    sprintf((char *)tmpBuf, "%d", (sizeof(buf)-1));  // Print Size of POST data body 99
 
     /*
      * Here we are setting lastFlag = 1 as it is last header field.
@@ -1216,13 +1216,12 @@ static int HTTPPostMethod_data(HTTPCli_Handle httpClient)
 
     /* Send POST data/body */
     //lRetVal = HTTPCli_sendRequestBody(httpClient, POST_DATA, (sizeof(POST_DATA)-1));
-    lRetVal = HTTPCli_sendRequestBody(httpClient, buf, (sizeof(buf)-26)); // POST data body
+    lRetVal = HTTPCli_sendRequestBody(httpClient, buf, (sizeof(buf)-1)); // POST data body
     if(lRetVal < 0)
     {
         UART_PRINT("Failed to send HTTP POST request body");
         return lRetVal;
     }
-
 
     lRetVal = readResponse(httpClient);
 
@@ -1578,7 +1577,7 @@ static int readPageResponse(HTTPCli_Handle httpClient)//Read data.txt page
     }
     else
     {
-        UART_PRINT("Failed to receive data from server.\r\n");
+        UART_PRINT("GET: Failed to receive data from server.\r\n");
         goto end;
     }
 
@@ -1610,9 +1609,7 @@ static int HTTPGetPageMethod(HTTPCli_Handle httpClient)//Read xstart.php page
 
     moreFlags = 0;
 
-    //lRetVal = HTTPCli_sendRequest(httpClient, HTTPCli_METHOD_GET, data_txt, moreFlags);//data_txt = data.txt
-    lRetVal = HTTPCli_sendRequest(httpClient, HTTPCli_METHOD_GET, GET_action_page, moreFlags);
-    //lRetVal = HTTPCli_sendRequest(httpClient, HTTPCli_METHOD_GET, GET_REQUEST_URI, moreFlags);//data.html
+    lRetVal = HTTPCli_sendRequest(httpClient, HTTPCli_METHOD_GET, message_brd, moreFlags);
     if(lRetVal < 0)
     {
         UART_PRINT("Failed to send HTTP GET request.");
@@ -1981,7 +1978,7 @@ int main()
     Door = GPIO_IF_Get(SH_GPIO_6,uiGPIOPort,pucGPIOPin);// Read the door
 #endif
 
-    strcpy ( &buf[66], " &TN=TBL1"); //buf[74]
+    //strcpy ( &buf[66], " &TN=TBL1"); //buf[74]
 
     strcpy ( &buf[53], " &RoomT="); //buf[60]
     strcpy ( &buf[0], " &IR1="); //buf[5]
@@ -2065,7 +2062,7 @@ int main()
                 lRetVal = HTTPPostMethod_data(&httpClient);//Reads page responce: lRetVal = readResponse(httpClient); commented out
                 if(lRetVal < 0){// If failed post data to the web-page
                     f_cntr++;
-                    UART_PRINT(", Failed Post Method");
+                    UART_PRINT(" Failed Post Method  ");
                     //EnterHIBernate();
                 }
             }
@@ -2095,7 +2092,7 @@ int main()
 #endif
 
 #ifdef cloud
-        if (f_cntr > 5){
+        if (f_cntr > 3){
             UART_PRINT(" Looks like a connection problem. Resetting...  ");
             EnterHIBernate();
         }
