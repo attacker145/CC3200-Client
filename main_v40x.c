@@ -334,7 +334,7 @@ unsigned char  g_ucConnectionSSID[SSID_LEN_MAX+1]; //Connection SSID
 unsigned char  g_ucConnectionBSSID[BSSID_LEN_MAX]; //Connection BSSID
 unsigned char g_buff[MAX_BUFF_SIZE+1];
 long bytesReceived = 0; // variable to store the file size
-char buf[75];
+char buf[84];
 unsigned char ucPinValue;//02/17/2017
 unsigned char Lght = 0;
 unsigned char Door = 0;
@@ -1198,7 +1198,7 @@ static int HTTPPostMethod_data(HTTPCli_Handle httpClient)
         return lRetVal;
     }
 
-    sprintf((char *)tmpBuf, "%d", (sizeof(buf)-1));  // Print Size of POST data body 99
+    sprintf((char *)tmpBuf, "%d", (sizeof(buf)-1));  // Print Size of POST data body 84
 
     /*
      * Here we are setting lastFlag = 1 as it is last header field.
@@ -1978,7 +1978,7 @@ int main()
     Door = GPIO_IF_Get(SH_GPIO_6,uiGPIOPort,pucGPIOPin);// Read the door
 #endif
 
-    //strcpy ( &buf[66], " &TN=TBL1"); //buf[74]
+    strcpy ( &buf[66], " &TN=controllall"); //The name of the table
 
     strcpy ( &buf[53], " &RoomT="); //buf[60]
     strcpy ( &buf[0], " &IR1="); //buf[5]
@@ -2056,7 +2056,7 @@ int main()
 #endif
 
 #ifdef cloud
-        if(t_cntr > 250){//285 ~60 sec
+        if(t_cntr > 100){//285 ~60 sec
             if(cnn_fail == 0){
                 t_cntr = 0;
                 lRetVal = HTTPPostMethod_data(&httpClient);//Reads page responce: lRetVal = readResponse(httpClient); commented out
@@ -2067,7 +2067,7 @@ int main()
                 }
             }
         }
-        if(t_cntr1 > 20){
+        if(t_cntr1 > 10){
             lRetVal = HTTPGetPageMethod(&httpClient);
             if(lRetVal < 0){
                 UART_PRINT(" Failed Get Method");
@@ -2089,6 +2089,8 @@ int main()
         t_cntr1++;
 
         MAP_UtilsDelay(1280000);
+        MAP_UtilsDelay(1280000);
+        //MAP_UtilsDelay(1280000);
 #endif
 
 #ifdef cloud
