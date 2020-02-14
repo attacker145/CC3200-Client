@@ -2039,6 +2039,15 @@ int main()
            (float)IR3,
            (float)IR4,
            sensorTemp);//cx is indice of the last buf[cx]. buff has all the data to be transferred
+       GPIO_IF_GetPortNPin(SH_GPIO_9,&uiGPIOPort,&pucGPIOPin);
+       ucPinValue = GPIO_IF_Get(SH_GPIO_9,uiGPIOPort,pucGPIOPin);
+       if (ucPinValue == 1){
+           //UART_PRINT("\n Red LED is ON \n");
+           strcpy ( &buf[cx], " &BLE=ON ");//buf[52]
+       }else{
+           //UART_PRINT("\n Red LED is OFF \n");
+           strcpy ( &buf[cx], " &BLE=OFF");//buf[52]
+       }
 #endif
 
 #ifdef cloud
@@ -2062,15 +2071,6 @@ int main()
                 //EnterHIBernate();
             }
             t_cntr1 = 0;
-        }
-        GPIO_IF_GetPortNPin(SH_GPIO_9,&uiGPIOPort,&pucGPIOPin);
-        ucPinValue = GPIO_IF_Get(SH_GPIO_9,uiGPIOPort,pucGPIOPin);
-        if (ucPinValue == 1){
-            //UART_PRINT("\n Red LED is ON \n");
-            strcpy ( &buf[44], " &BLE=ON ");//buf[52]
-        }else{
-            //UART_PRINT("\n Red LED is OFF \n");
-            strcpy ( &buf[44], " &BLE=OFF");//buf[52]
         }
         t_cntr++;
         t_cntr1++;
