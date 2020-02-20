@@ -1993,7 +1993,7 @@ int main()
     }
 
     sl_NetCfgGet(SL_MAC_ADDRESS_GET,NULL,&macAddressLen,(_u8 *)macAddressVal);
-    UART_PRINT("\nMAC: %X \n\r", macAddressVal);
+    UART_PRINT("\nMAC: %d \n\r", macAddressVal);
 
     i = 0;
 #ifdef light

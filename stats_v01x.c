@@ -64,16 +64,16 @@ double sonar_sensr1(unsigned long int *mean){
     unsigned int temp, T_snr_int;
     double variance = 0;
 
-    for (i = 0; i < (array_size - 1); i++){//[0,1,2,3,4,5,6,7,8,9...] - 50 samples
+    for (i = 0; i < (array_size - 1); i++){//[0,1,2,3,4,5,6,7,8,9,...,array_size - 1]
         stl_data1[i] = stl_data1[(i+1)]; // shift 50 samples (initially all zeros)
     }
 
     data_rdy = GPIOPinRead(GPIOA0_BASE, 0x80);//Read PIN_62 GPIO_7 - Trash-Sonar Pin 2 - Address Announce / Status
     if (data_rdy == 0){//Read Data when PIN2 is Low
         ts_write_cmmnd ((unsigned char)0x51);//spiked
-        if (snr_flt == 1){//I2C Fault detected
-            LOOP_FOREVER();
-        }
+        //if (snr_flt == 1){//I2C Fault detected
+            //LOOP_FOREVER();
+        //}
         MAP_UtilsDelay(1280000);//delay 0.08 s #define SEC_TO_LOOP(x)        ((80000000/5)*x) -> 16000 000 - 1sec
     }
     data_rdy = GPIOPinRead(GPIOA0_BASE, 0x80);//Read PIN_62 GPIO_7 - Trash-Sonar Pin 2 - Address Announce / Status
@@ -93,7 +93,7 @@ double sonar_sensr1(unsigned long int *mean){
     *mean = *mean / (array_size - 1); // *mean/49
 
     variance = 0;
-    for(i=0; i < (array_size - 1); ++i){//[0,1,2,3,4,5,6,7,8,9]
+    for(i=0; i < (array_size - 1); ++i){//[0,1,2,3,4,5,6,7,8,9,...,array_size - 1]
         temp = stl_data1[i];
         if ((unsigned int) *mean > stl_data1[i])
             temp = *mean - stl_data1[i];
@@ -112,16 +112,16 @@ double sonar_sensr2(unsigned long int *mean){
     unsigned int temp, T_snr_int;
     double variance = 0;
     //Data shift
-    for (i = 0; i < (array_size - 1); i++){//[0,1,2,3,4,5,6,7,8,9...] - 50 samples
+    for (i = 0; i < (array_size - 1); i++){//[0,1,2,3,4,5,6,7,8,9,...,array_size - 1]
         stl_data2[i] = stl_data2[(i+1)]; // shift 51 samples
     }
     //Get new point 51
     data_rdy = GPIOPinRead(GPIOA0_BASE, 0x80);//Read PIN_62 GPIO_7 - Trash-Sonar Pin 2 - Address Announce / Status
     if (data_rdy == 0){//Read Data when PIN2 is Low
         ts1_write_cmmnd ((unsigned char)0x51);
-        if (snr_flt == 1){//I2C Fault detected
-            LOOP_FOREVER();
-        }
+        //if (snr_flt == 1){//I2C Fault detected
+            //LOOP_FOREVER();
+        //}
         MAP_UtilsDelay(1280000);//delay 0.08 s #define SEC_TO_LOOP(x)        ((80000000/5)*x) -> 16000 000 - 1sec
     }
     data_rdy = GPIOPinRead(GPIOA0_BASE, 0x80);//Read PIN_62 GPIO_7 - Trash-Sonar Pin 2 - Address Announce / Status
@@ -143,7 +143,7 @@ double sonar_sensr2(unsigned long int *mean){
 
     variance = 0;
     //Compute STDEV based on sample 0-49
-    for(i=0; i < (array_size - 1); ++i){//[0,1,2,3,4,5,6,7,8,9]
+    for(i=0; i < (array_size - 1); ++i){//[0,1,2,3,4,5,6,7,8,9,...,array_size - 1]
         temp = stl_data2[i];
         if ((unsigned int) *mean > stl_data2[i])
             temp = *mean - stl_data2[i];
@@ -160,10 +160,10 @@ void prnt_sonar (double st_dev1, double st_dev2, unsigned long int mean_SNSR1, u
     UART_PRINT("STDEV1: %.1f ", st_dev1);
     UART_PRINT("STDEV2: %.1f ", st_dev2);
     if (st_dev1 > 10){//motion sensor
-        UART_PRINT("\nMotion L-SNSR %.1f ", st_dev1);
+        UART_PRINT("\nMotion SNSR1 ");
     }
     if (st_dev2 > 10){//motion sensor
-        UART_PRINT("Motion R-SNSR %.1f ", st_dev2);
+        UART_PRINT("Motion SNSR2 ");
     }
     UART_PRINT("\n");
 }
