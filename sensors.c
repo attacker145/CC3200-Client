@@ -233,7 +233,7 @@ BMA222Open_()
     // Read the CHIP ID NUM
     //
     RET_IF_ERR(GetRegisterValue_(BMA222_CHID_ID_NUM_, &ucRegVal));
-    DBG_PRINT("CHIP ID: 0x%x\n\r", ucRegVal);
+    DBG_PRINT("CHIP ID: 0x%x\n", ucRegVal);
 
     return SUCCESS;
 }
@@ -470,10 +470,10 @@ TMP006DrvOpen_()
     // Get the manufacturer ID
     //
     RET_IF_ERR(GetRegisterValue_temp_(TMP006_MANUFAC_ID_REG_ADDR_, &usManufacID));
-    DBG_PRINT("Manufacturer ID: 0x%x\n\r", usManufacID);
+    DBG_PRINT("Manufacturer ID: 0x%x\n", usManufacID);
     if(usManufacID != TMP006_MANUFAC_ID_)
     {
-        DBG_PRINT("Error in Manufacturer ID\n\r");
+        DBG_PRINT("Error in Manufacturer ID\n");
         return FAILURE;
     }
 
@@ -481,7 +481,7 @@ TMP006DrvOpen_()
     // Get the device ID
     //
     RET_IF_ERR(GetRegisterValue_temp_(TMP006_DEVICE_ID_REG_ADDR_, &usDevID));
-    DBG_PRINT("Device ID: 0x%x\n\r", usDevID);
+    DBG_PRINT("Device ID: 0x%x\n", usDevID);
     if(usDevID != TMP006_DEVICE_ID_)
     {
         DBG_PRINT("Error in Device ID\n");
@@ -492,7 +492,7 @@ TMP006DrvOpen_()
     // Get the configuration register value
     //
     RET_IF_ERR(GetRegisterValue_temp_(TMP006_CONFIG_REG_ADDR_, &usConfigReg));
-    DBG_PRINT("Configuration register value: 0x%x\n\r", usConfigReg);
+    DBG_PRINT("Configuration register value: 0x%x\n", usConfigReg);
 
     return SUCCESS;
 }

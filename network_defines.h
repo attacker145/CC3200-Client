@@ -19,6 +19,7 @@
 #define GET_REQUEST_URI_PAGE	"/data.html"
 
 #define message_brd         "/webapp_pub/CC3200command.php"
+//#define POST_REQUEST_URI        "/webapp_pub/pub_post.php"
 #define POST_REQUEST_URI        "/webapp_pub/pub_post.php"
 
 //#define HOST_NAME       		"httpbin.org" //"<host name>"

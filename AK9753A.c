@@ -242,14 +242,14 @@ void AK975XsetMode(unsigned char mode)
 	//Read, mask set, write
 	//byte currentSettings = readRegister(AK975X_ECNTL1);
 	GetRegisterValue_AK9753((unsigned char) AK975X_ECNTL1, &currentSettings);
-	UART_PRINT("\n\rMode reg hist: 0x%x", currentSettings);
+	UART_PRINT("\nMode reg hist: 0x%x", currentSettings);
 	currentSettings &= 0b11111000; //Clear Mode bits
 	currentSettings |= mode;
 	//UART_PRINT("\n\rMode Data to load 0x%x", currentSettings);
 	//writeRegister(AK975X_ECNTL1, currentSettings);
 	SetRegisterValue_AK9753((unsigned char) AK975X_ECNTL1, currentSettings);
 	GetRegisterValue_AK9753((unsigned char) AK975X_ECNTL1, &currentSettings);
-	UART_PRINT("\n\rMode reg set: 0x%x", currentSettings);
+	UART_PRINT("\nMode reg set: 0x%x", currentSettings);
 }
 
 
@@ -263,13 +263,13 @@ void setCutoffFrequency(uint8_t frequency){
 	//Read, mask set, write
 	//byte currentSettings = readRegister(AK975X_ECNTL1);
 	GetRegisterValue_AK9753((unsigned char) AK975X_ECNTL1, &currentSettings);
-	UART_PRINT("\n\rFreq reg hist: 0x%x", currentSettings);
+	UART_PRINT("\nFreq reg hist: 0x%x", currentSettings);
 	currentSettings &= 0b11000111; //Clear EFC bits
 	currentSettings |= (frequency << 3); //Mask in
 	//writeRegister(AK975X_ECNTL1, currentSettings); //Write
 	SetRegisterValue_AK9753((unsigned char) AK975X_ECNTL1, currentSettings);
 	GetRegisterValue_AK9753((unsigned char) AK975X_ECNTL1, &currentSettings);
-	UART_PRINT("\n\rFreq reg set: 0x%x", currentSettings);
+	UART_PRINT("\nFreq reg set: 0x%x", currentSettings);
 }
 
 void ECNTL1_rst (void){
@@ -278,7 +278,7 @@ void ECNTL1_rst (void){
 
 	SetRegisterValue_AK9753((unsigned char) AK975X_ECNTL1, currentSettings);
 	GetRegisterValue_AK9753((unsigned char) AK975X_ECNTL1, &currentSettings);
-	UART_PRINT("\n\rMode and Fc reg: 0x%x", currentSettings);
+	UART_PRINT("\nMode and Fc reg: 0x%x", currentSettings);
 }
 
 
@@ -348,10 +348,10 @@ int AK9753AReadData(unsigned char *IR1L_, unsigned char *IR1H_,
 	stat &= 0b00000001;
 	if (stat == 0x01){
 		//UART_PRINT("\n\rIR Data is ready");
-	    UART_PRINT(", IR");
+	    //UART_PRINT("IR");
 	}else{
 		//UART_PRINT("\n\rIR Data is not ready");
-	    UART_PRINT(", NIR");
+	    //UART_PRINT("NIR");
 	}
 
 	//                           (Address of reg to read, var to store data, size of var)
@@ -415,16 +415,16 @@ void AK9753_ID (void){
 
 	GetRegisterValue_AK9753((unsigned char) AK975X_WIA2, &deviceID);
 	//AK9753A_BlockRead (WIA2, (unsigned char *)&cID, sizeof(cID));
-	UART_PRINT("\n\rAK9753 ID: %d", deviceID);
+	UART_PRINT("\nAK9753 ID: %d", deviceID);
 	GetRegisterValue_AK9753((unsigned char) AK975X_INFO1, &sensorType);
 
 	if (deviceID != 0x13) //Device ID should be 0x13
-		UART_PRINT("\n\rAK9753 ID invalid");
+		UART_PRINT("\nAK9753 ID invalid");
 
 	  if (sensorType == SENSORVERSION_AK9750)
-		  UART_PRINT("\n\rAK9750 Online!");
+		  UART_PRINT("\nAK9750 Online!");
 	  if (sensorType == SENSORVERSION_AK9753) {
-		  UART_PRINT("\n\rAK9753 Online!");
+		  UART_PRINT("\nAK9753 Online!");
 	  }
 
 }

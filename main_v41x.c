@@ -280,9 +280,6 @@ extern void address (unsigned char *Databuf);
 extern float adc_read (unsigned long* pulAdcSamples, unsigned int len);
 
 extern void sonar_cycle_pwr (void);
-extern double sonar_sensr1(unsigned long int *mean);
-extern double sonar_sensr2(unsigned long int *mean);
-void prnt_sonar (double st_dev1, double st_dev2, unsigned long int mean_SNSR1, unsigned long int mean_SNSR2);
 
 //*****************************************************************************
 
@@ -337,13 +334,15 @@ unsigned char  g_ucConnectionSSID[SSID_LEN_MAX+1]; //Connection SSID
 unsigned char  g_ucConnectionBSSID[BSSID_LEN_MAX]; //Connection BSSID
 unsigned char g_buff[MAX_BUFF_SIZE+1];
 long bytesReceived = 0; // variable to store the file size
-char buf[109];
+char buf[99];
 unsigned char ucPinValue;//02/17/2017
-unsigned char snr_flt = 0;
+unsigned char Lght = 0;
 unsigned char Door = 0;
 unsigned char BLE_data_rdy = 0;
 unsigned int uiGPIOPort;//02/17/2017
 unsigned char pucGPIOPin;//02/17/2017
+unsigned char flg;
+unsigned char human;
 unsigned char timeout;
 volatile unsigned char wdtcntr;
 
@@ -366,14 +365,15 @@ int iStringLength = 0;
 SlVersionFull ver = {0};
 unsigned char ucConfigOpt = SL_DEVICE_GENERAL_VERSION;
 unsigned char ucConfigLen = sizeof(ver);
+
 unsigned char door_flg = 0;
 unsigned char snr_flg=0;
 unsigned char snr_flg1=0;
 unsigned char T_snr [2];
 unsigned int T_snr_int;
 unsigned char gaucOldMacDonald[4];
-unsigned int stl_data1[array_size];
-unsigned int stl_data2[array_size];
+
+
 
 //*****************************************************************************
 //                 GLOBAL VARIABLES -- End
@@ -995,7 +995,7 @@ static int readResponse(HTTPCli_Handle httpClient)
         {
         case 200:
         {
-            UART_PRINT("HTTP Status 200");
+            UART_PRINT(", HTTP Status 200");
             /*
                  Set response header fields to filter response headers. All
                   other than set by this call we be skipped by library.
@@ -1441,7 +1441,7 @@ static int readPageResponse(HTTPCli_Handle httpClient)//Read data.txt page
         {
         case 200:
         {
-            UART_PRINT("HTTP Status 200");
+            UART_PRINT(", HTTP Status 200");
 
             HTTPCli_setResponseFields(httpClient, (const char **)ids);
 
@@ -1456,7 +1456,7 @@ static int readPageResponse(HTTPCli_Handle httpClient)//Read data.txt page
                 {
                     len = strtoul((char *)g_buff, NULL, 0);
                     //UART_PRINT("\n\rHTTPCli_FIELD_NAME_CONTENT_LENGTH\n\r");
-                    UART_PRINT(", Number of characters received: %d", len);// Print number of characters that will be sent by the server
+                    UART_PRINT(", Number of characters received (xstart.php): %s", len);// Print number of characters that will be sent by the server
                 }
                 break;
                 case 1: /* HTTPCli_FIELD_NAME_CONNECTION */
@@ -1528,12 +1528,12 @@ static int readPageResponse(HTTPCli_Handle httpClient)//Read data.txt page
             if (output){
                 GPIO_IF_GetPortNPin(SH_GPIO_9,&uiGPIOPort,&pucGPIOPin); // Turn On Red LED
                 GPIO_IF_Set(SH_GPIO_9,uiGPIOPort,pucGPIOPin,alarm_off);
-                UART_PRINT("\nLED ON \n");
+                UART_PRINT("\n LED ON ");
             }
             else{
                 GPIO_IF_GetPortNPin(SH_GPIO_9,&uiGPIOPort,&pucGPIOPin); // Turn Off Red LED
                 GPIO_IF_Set(SH_GPIO_9,uiGPIOPort,pucGPIOPin,alarm_on);
-                UART_PRINT("\nLED OFF \n");
+                UART_PRINT("\n LED OFF ");
             }
             //--------------------------------------------------------------------------------------------------
 
@@ -1854,6 +1854,7 @@ int main()
     unsigned int t_cntr = 0;
     unsigned int t_cntr1 = 0;
     unsigned int f_cntr = 0;
+#ifdef AK975
     unsigned char IR1L_ = 0;
     unsigned char IR1H_ = 0;
     unsigned char IR2L_ = 0;
@@ -1868,15 +1869,10 @@ int main()
     unsigned int IR4 = 0;
     unsigned char cnn_fail = 0;
     int cx;
-    unsigned long int mean_SNSR1;
-    unsigned long int mean_SNSR2;
-    double st_dev1;
-    double st_dev2;
-    unsigned long int SNSR1_mean[10];
-    unsigned long int SNSR2_mean[10];
-    unsigned char i, y, cntr;
-    _u8 macAddressVal[SL_MAC_ADDR_LEN];
-    _u8 macAddressLen = SL_MAC_ADDR_LEN;
+
+    //tBoolean bRetcode;
+    //char rtbuf[10];
+#endif
 
     BoardInit();// Board Initialization
 
@@ -1933,7 +1929,7 @@ int main()
 //*********************************************************************************************
 
      init_adc ();
-     UART_PRINT("\nADC is initialized.");
+     UART_PRINT("\n\rADC is initialized.");
 
      lRetVal = TMP006DrvOpen_();
      if(lRetVal < 0)
@@ -1979,23 +1975,6 @@ int main()
     }
 #endif
 
-    unsigned char Databuf [] = {170, 165, 100};
-    GPIO_IF_GetPortNPin(SH_GPIO_22,&uiGPIOPort,&pucGPIOPin);//Read SW2. If button is pressed send the sequence
-    ucPinValue = GPIO_IF_Get(SH_GPIO_22,uiGPIOPort,pucGPIOPin);
-    if (ucPinValue == 1){
-        address (Databuf);
-        UART_PRINT("\nAddress programmed ");
-        while(1){
-            g_bFeedWatchdog = true;
-
-            MAP_UtilsDelay(1280000);
-        }
-    }
-
-    sl_NetCfgGet(SL_MAC_ADDRESS_GET,NULL,&macAddressLen,(_u8 *)macAddressVal);
-    UART_PRINT("\nMAC: %X \n\r", macAddressVal);
-
-    i = 0;
 #ifdef light
     GPIO_IF_GetPortNPin(SH_GPIO_6,&uiGPIOPort,&pucGPIOPin);//PIN61
     Door = GPIO_IF_Get(SH_GPIO_6,uiGPIOPort,pucGPIOPin);// Read the door
@@ -2004,12 +1983,7 @@ int main()
     while(1){
         g_bFeedWatchdog = true;
         TMP006DrvGetTemp_(&sensorTemp);
-#define snr
-#ifdef snr
-        st_dev1 = sonar_sensr1(&mean_SNSR1);
-        st_dev2 = sonar_sensr2(&mean_SNSR2);
-        prnt_sonar (st_dev1, st_dev2, mean_SNSR1, mean_SNSR2);
-#endif
+        UART_PRINT("%.2f ", sensorTemp);  //
 #ifdef AK975
         //Read GPIO12: AK9753A INT
         GPIO_IF_GetPortNPin(SH_GPIO_12,&uiGPIOPort,&pucGPIOPin);    // Computes port and pin number from the GPIO number
@@ -2017,58 +1991,67 @@ int main()
         if(ucPinValue == 0){
             AK9753AReadData(&IR1L_, &IR1H_, &IR2L_, &IR2H_, &IR3L_, &IR3H_, &IR4L_, &IR4H_);    //*
             //roomtemp = getTemperature_AK9753(&sgn);
-        }                                                                                      //*
+        }                                                                                       //*
+
         //UART_PRINT(", RT =");                                                                //*
-        //if ((sgn == '+') && (roomtemp < 60))                                                 //*
-        //    UART_PRINT(" +%f", roomtemp);                                                    //*
+        //if ((sgn == '+') && (roomtemp < 60))                                                    //*
+        //    UART_PRINT(" +%f", roomtemp);                                                       //*
         //else
         //    UART_PRINT("NA");
-        //if ((sgn == '-') && (roomtemp < 60))                                                 //*
-        //    UART_PRINT(" -%f", roomtemp);                                                    //*
+        //if ((sgn == '-') && (roomtemp < 60))                                                    //*
+        //    UART_PRINT(" -%f", roomtemp);                                                       //*
         //else
         //    UART_PRINT("NA");
-       IR1 = IR1H_; IR1 = IR1 << 8;                                                             //*                                                                                 //*
+
+       IR1 = IR1H_;                                                                             //*
+       IR1 = IR1 << 8;                                                                          //*
        IR1 = IR1 + (unsigned int)IR1L_;                                                         //*
-       IR2 = IR2H_; IR2 = IR2 << 8;                                                             //*                                                                                                //*
+       hexdec_long( (uint32_t) IR1 );                                                           //*
+       UART_PRINT(", IR1=");                                                                    //*
+       UART_PRINT(&Rx_buf[4]);                                                                  //*                                               //*
+                                                                                       //*
+       IR2 = IR2H_;                                                                             //*
+       IR2 = IR2 << 8;                                                                          //*
        IR2 = IR2 + (unsigned int)IR2L_;                                                         //*
-       IR3 = IR3H_; IR3 = IR3 << 8;                                                             //*
+       hexdec_long( (uint32_t) IR1 );                                                           //*
+       UART_PRINT(", IR2=");                                                                    //*
+       UART_PRINT(&Rx_buf[4]); //                                                               //*
+                                                       //*                                                                                       //*
+       IR3 = IR3H_;                                                                             //*
+       IR3 = IR3 << 8;                                                                          //*
        IR3 = IR3 + (unsigned int)IR3L_;                                                         //*
-       IR4 = IR4H_; IR4 = IR4 << 8;                                                             //*
-       IR4 = IR4 + (unsigned int)IR4L_;                                                         //*                                                                                                     //*
+       hexdec_long( (uint32_t) IR1 );                                                           //*
+       UART_PRINT(", IR3=");                                                                    //*
+       UART_PRINT(&Rx_buf[4]);                                                                  //*
+                                                                                        //*
+       IR4 = IR4H_;                                                                             //*
+       IR4 = IR4 << 8;                                                                          //*
+       IR4 = IR4 + (unsigned int)IR4L_;                                                         //*
+       hexdec_long( (uint32_t) IR1 );                                                           //*
+       UART_PRINT(", IR4=");                                                                    //*
+       UART_PRINT(&Rx_buf[4]);                                                                  //*                                                                                                     //*
        //gcvt(roomtemp, 6, buf); sensorTemp
        //sprintf(rtbuf, "%.2f", roomtemp);
+       UART_PRINT("\n");
+       cx = snprintf(buf, 99, "IR1=%.0f & IR2=%.0f & IR3=%.0f & IR4=%.0f & RoomT=%.2f & TName=controllall",
+           (float)IR1,
+           (float)IR2,
+           (float)IR3,
+           (float)IR4,
+           sensorTemp);//cx is indice of the last buf[cx]. buff has all the data to be transferred
        GPIO_IF_GetPortNPin(SH_GPIO_9,&uiGPIOPort,&pucGPIOPin);
        ucPinValue = GPIO_IF_Get(SH_GPIO_9,uiGPIOPort,pucGPIOPin);
        if (ucPinValue == 1){
-           cx = snprintf(buf, 109, "IR1=%.0f & IR2=%.0f & IR3=%.0f & IR4=%.0f & RoomT=%.2f & TName=controllall & BLE=ON & ms=%X",
-                         (float)IR1,
-                         (float)IR2,
-                         (float)IR3,
-                         (float)IR4,
-                         sensorTemp,
-                         (char*)macAddressVal);//cx is indice of the last buf[cx]. buff has all the data to be transferred
+           //UART_PRINT("\n Red LED is ON \n");
+           strcpy ( &buf[cx], " & BLE=ON ");//buf[52]
        }else{
-           cx = snprintf(buf, 109, "IR1=%.0f & IR2=%.0f & IR3=%.0f & IR4=%.0f & RoomT=%.2f & TName=controllall & BLE=OFF & ms=%X",
-                         (float)IR1,
-                         (float)IR2,
-                         (float)IR3,
-                         (float)IR4,
-                         sensorTemp,
-                         (char*)macAddressVal);//cx is indice of the last buf[cx]. buff has all the data to be transferred
-       }
-#endif
-
-#ifdef snr
-       if (st_dev1 > 10){//Capture motion
-           strcpy ( &buf[cx], " & temp=X");
-       }
-       if (st_dev2 > 10){//Capture motion
-           strcpy ( &buf[cx], " & light=X");
+           //UART_PRINT("\n Red LED is OFF \n");
+           strcpy ( &buf[cx], " & BLE=OFF");//buf[52]
        }
 #endif
 
 #ifdef cloud
-        if(t_cntr > 30){//10sec
+        if(t_cntr > 100){//285 ~60 sec
             if(cnn_fail == 0){
                 t_cntr = 0;
                 lRetVal = HTTPPostMethod_data(&httpClient);//Reads page responce: lRetVal = readResponse(httpClient); commented out
@@ -2078,38 +2061,9 @@ int main()
                     //EnterHIBernate();
                 }
             }
-            if (i==9){
-                for(y = 0; y < 9; y++){
-                    for (i = 0; i < 9; i++){//10 samples
-                        if(SNSR1_mean[y] != SNSR1_mean[i]){
-                            cntr++;
-                        }
-                    }
-                }
-                if (cntr > 3){
-                    UART_PRINT(" Possible Fall ");
-                }
-
-                for(y = 0; y < 9; y++){
-                    for (i = 0; i < 9; i++){//10 samples
-                        if(SNSR2_mean[y] != SNSR2_mean[i]){
-                            cntr++;
-                        }
-                    }
-                }
-                if (cntr > 3){
-                    UART_PRINT(" Possible Fall ");
-                }
-                i = 0;// reset counter
-            }else{
-                i++;
-            }
-            SNSR1_mean[i] = mean_SNSR1;
-            SNSR2_mean[i] = mean_SNSR2;
         }
-
         if(t_cntr1 > 10){
-            UART_PRINT("buf:%s \n\r", buf);
+            UART_PRINT("buf:%s \n", buf);
             lRetVal = HTTPGetPageMethod(&httpClient);
             if(lRetVal < 0){
                 UART_PRINT(" Failed Get Method");
@@ -2121,7 +2075,7 @@ int main()
         t_cntr++;
         t_cntr1++;
 
-        //MAP_UtilsDelay(1280000);
+        MAP_UtilsDelay(1280000);
         MAP_UtilsDelay(1280000);
 #endif
 
