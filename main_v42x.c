@@ -1657,7 +1657,7 @@ static long ConnectToAP()
         return -1;
     }
 
-    UART_PRINT("ConnectAP: Device is configured in default state \n\r");
+    UART_PRINT("ConnectAP: Device is configured in default state \n");
 
     //
     // Assumption is that the device is configured in station mode already
@@ -1669,16 +1669,16 @@ static long ConnectToAP()
         ASSERT_ON_ERROR(DEVICE_START_FAILED);
     }
 
-    UART_PRINT("Device started as STATION \n\r");
+    UART_PRINT("Device started as STATION \n");
 
     // Connecting to WLAN AP - Set with static parameters defined at the top
     // After this call we will be connected and have IP address
     lRetVal = WlanConnect();
     if(lRetVal == SUCCESS){
-        UART_PRINT("\n\rConnected to the AP: %s\r\n", cSSID_NAME);
+        UART_PRINT("\n\rConnected to the AP: %s\r", cSSID_NAME);
     }
     else{
-        UART_PRINT("\n\rFailed to connect to the AP: %s\r\n", SSID_NAME);
+        UART_PRINT("\nFailed to connect to the AP: %s\r\n", SSID_NAME);
     }
     return 0;
 }
@@ -1890,10 +1890,8 @@ int main()
     InitTerm();
     InitTermUART1();
 
-    //MAP_UtilsDelay(10000000);
-
     DisplayBanner(APP_NAME);// Display banner
-//===============================================================================
+
     //
     // Set up the watchdog interrupt handler.
     //
@@ -1904,8 +1902,23 @@ int main()
     {
        WDT_IF_DeInit();
     }
-//===============================================================================
-   //WDT_IF_DeInit();
+    //WDT_IF_DeInit();
+    //SET MAC address
+    GPIO_IF_GetPortNPin(SH_GPIO_13,&uiGPIOPort,&pucGPIOPin);//Read SW3. If button is pressed set MAC address
+    ucPinValue = GPIO_IF_Get(SH_GPIO_13,uiGPIOPort,pucGPIOPin);
+    if (ucPinValue == 1){
+        sl_Start(NULL,NULL,NULL);
+        _u8 MAC_Address[6];
+        MAC_Address[0] = 0x10;
+        MAC_Address[1] = 0x12;
+        MAC_Address[2] = 0x28;
+        MAC_Address[3] = 0x22;
+        MAC_Address[4] = 0x69;
+        MAC_Address[5] = 0x19;
+        sl_NetCfgSet(SL_MAC_ADDRESS_SET,1,SL_MAC_ADDR_LEN,(_u8 *)MAC_Address);
+        sl_Stop(0);
+        UART_PRINT("\nMAC is set: %d", MAC_Address);
+    }
 
    //
    // I2C Init
