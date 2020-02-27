@@ -1877,7 +1877,7 @@ int main()
     unsigned char i, y, cntr;
     _u8 macAddressVal[SL_MAC_ADDR_LEN];
     _u8 macAddressLen = SL_MAC_ADDR_LEN;
-
+    unsigned long long MAC;
     BoardInit();// Board Initialization
 
     sonar_cycle_pwr ();// 5sec off pins start to initialize here
@@ -1909,15 +1909,21 @@ int main()
     if (ucPinValue == 1){
         sl_Start(NULL,NULL,NULL);
         _u8 MAC_Address[6];
-        MAC_Address[0] = 0x10;
-        MAC_Address[1] = 0x12;
+        MAC_Address[0] = 0x8;
+        MAC_Address[1] = 0x0;
         MAC_Address[2] = 0x28;
         MAC_Address[3] = 0x22;
         MAC_Address[4] = 0x69;
-        MAC_Address[5] = 0x19;
+        MAC_Address[5] = 0x31;
         sl_NetCfgSet(SL_MAC_ADDRESS_SET,1,SL_MAC_ADDR_LEN,(_u8 *)MAC_Address);
         sl_Stop(0);
-        UART_PRINT("\nMAC is set: %d", MAC_Address);
+        UART_PRINT("\n MAC address is set to: %02x:%02x:%02x:%02x:%02x:%02x \n",
+                   MAC_Address[0],
+                   MAC_Address[1],
+                   MAC_Address[2],
+                   MAC_Address[3],
+                   MAC_Address[4],
+                   MAC_Address[5]);
     }
 
    //
@@ -2006,7 +2012,25 @@ int main()
     }
 
     sl_NetCfgGet(SL_MAC_ADDRESS_GET,NULL,&macAddressLen,(_u8 *)macAddressVal);
-    UART_PRINT("\nMAC: %d \n\r", macAddressVal);
+    UART_PRINT("\n MAC address: %02X:%02X:%02X:%02X:%02X:%02X \n",
+               macAddressVal[0],
+               macAddressVal[1],
+               macAddressVal[2],
+               macAddressVal[3],
+               macAddressVal[4],
+               macAddressVal[5]);
+
+    MAC = macAddressVal[0];
+    MAC = MAC << 8;
+    MAC = MAC + macAddressVal[1];
+    MAC = MAC << 8;
+    MAC = MAC + macAddressVal[2];
+    MAC = MAC << 8;
+    MAC = MAC + macAddressVal[3];
+    MAC = MAC << 8;
+    MAC = MAC + macAddressVal[4];
+    MAC = MAC << 8;
+    MAC = MAC + macAddressVal[5];
 
     i = 0;
 #ifdef light
@@ -2053,21 +2077,21 @@ int main()
        GPIO_IF_GetPortNPin(SH_GPIO_9,&uiGPIOPort,&pucGPIOPin);
        ucPinValue = GPIO_IF_Get(SH_GPIO_9,uiGPIOPort,pucGPIOPin);
        if (ucPinValue == 1){
-           cx = snprintf(buf, 109, "IR1=%.0f & IR2=%.0f & IR3=%.0f & IR4=%.0f & RoomT=%.2f & TName=controllall & BLE=ON & ms=%X",
+           cx = snprintf(buf, 109, "IR1=%.0f & IR2=%.0f & IR3=%.0f & IR4=%.0f & RoomT=%.2f & TName=controllall & BLE=ON & ms=%llX",
                          (float)IR1,
                          (float)IR2,
                          (float)IR3,
                          (float)IR4,
                          sensorTemp,
-                         (char*)macAddressVal);//cx is indice of the last buf[cx]. buff has all the data to be transferred
+                         (*(uint64_t *) macAddressVal) & 0x0000FFFFFFFFFFFF);//cx is indice of the last buf[cx]. buff has all the data to be transferred
        }else{
-           cx = snprintf(buf, 109, "IR1=%.0f & IR2=%.0f & IR3=%.0f & IR4=%.0f & RoomT=%.2f & TName=controllall & BLE=OFF & ms=%X",
+           cx = snprintf(buf, 109, "IR1=%.0f & IR2=%.0f & IR3=%.0f & IR4=%.0f & RoomT=%.2f & TName=controllall & BLE=OFF & ms=%llX",
                          (float)IR1,
                          (float)IR2,
                          (float)IR3,
                          (float)IR4,
                          sensorTemp,
-                         (char*)macAddressVal);//cx is indice of the last buf[cx]. buff has all the data to be transferred
+                         (*(uint64_t *) macAddressVal) & 0x0000FFFFFFFFFFFF);//cx is indice of the last buf[cx]. buff has all the data to be transferred
        }
 #endif
 
