@@ -1877,7 +1877,7 @@ int main()
     unsigned char i, y, cntr;
     _u8 macAddressVal[SL_MAC_ADDR_LEN];
     _u8 macAddressLen = SL_MAC_ADDR_LEN;
-    unsigned long long MAC;
+    float MAC;
     BoardInit();// Board Initialization
 
     sonar_cycle_pwr ();// 5sec off pins start to initialize here
@@ -2020,17 +2020,8 @@ int main()
                macAddressVal[4],
                macAddressVal[5]);
 
-    MAC = macAddressVal[0];
-    MAC = MAC << 8;
-    MAC = MAC + macAddressVal[1];
-    MAC = MAC << 8;
-    MAC = MAC + macAddressVal[2];
-    MAC = MAC << 8;
-    MAC = MAC + macAddressVal[3];
-    MAC = MAC << 8;
-    MAC = MAC + macAddressVal[4];
-    MAC = MAC << 8;
-    MAC = MAC + macAddressVal[5];
+    //MAC = (float)((*(uint64_t *) macAddressVal) & 0x0000FFFFFFFFFFFF);
+    //UART_PRINT("MAC address: %.0f \n\r",MAC);
 
     i = 0;
 #ifdef light
