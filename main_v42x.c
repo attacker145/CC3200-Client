@@ -187,6 +187,8 @@ volatile unsigned long g_ulTimerInts = 0;
 //static unsigned char g_ucDryerRunning = 0;
 
 char Rx_buf[10];
+_u8 macAddressVal[SL_MAC_ADDR_LEN];
+_u8 macAddressLen = SL_MAC_ADDR_LEN;
 //*****************************************************************************
 //
 // API Function prototypes
@@ -1423,6 +1425,9 @@ static int readPageResponse(HTTPCli_Handle httpClient)//Read data.txt page
     int json = 0;
     char *dataBuffer=NULL;
     bool moreFlags = 1;
+    char ID[256];
+    uint64_t ID_val;
+    unsigned char ID_flg = 0;
     //char * str1;
     //char * str2;
     const char *ids[4] = {
@@ -1524,8 +1529,19 @@ static int readPageResponse(HTTPCli_Handle httpClient)//Read data.txt page
             UART_PRINT(", ");
             UART_PRINT(dataBuffer);
             UART_PRINT(", ");
-            output = strstr (dataBuffer,"redledon");
+            ID_val = (*(uint64_t *) macAddressVal) & 0x0000FFFFFFFFFFFF;
+            snprintf(ID, sizeof(ID)-1, "%llu", (unsigned long long) ID_val);
+            output = strstr (dataBuffer,ID);
             if (output){
+                UART_PRINT("\nID is correct  ");
+                ID_flg = 1;
+            }else{
+                UART_PRINT("\nID is not correct  ");
+                ID_flg = 0;
+            }
+            *output = NULL;
+            output = strstr (dataBuffer,"redledon");
+            if (output && (ID_flg == 1)){
                 GPIO_IF_GetPortNPin(SH_GPIO_9,&uiGPIOPort,&pucGPIOPin); // Turn On Red LED
                 GPIO_IF_Set(SH_GPIO_9,uiGPIOPort,pucGPIOPin,alarm_off);
                 UART_PRINT("\nLED ON \n");
@@ -1875,9 +1891,7 @@ int main()
     unsigned long int SNSR1_mean[10];
     unsigned long int SNSR2_mean[10];
     unsigned char i, y, cntr;
-    _u8 macAddressVal[SL_MAC_ADDR_LEN];
-    _u8 macAddressLen = SL_MAC_ADDR_LEN;
-    float MAC;
+    //float MAC;
     BoardInit();// Board Initialization
 
     sonar_cycle_pwr ();// 5sec off pins start to initialize here
